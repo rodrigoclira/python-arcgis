@@ -15,6 +15,10 @@ for edificacao in cur_edificacao:
             if pol_lote.contains(centroide):
                 print "FID do LOTE", lote.getValue("FID")
                 print "Area", pol_lote.area
+                print "Pontos", pol_lote.getPart()
+                for array in pol_lote.getPart():
+                    for ponto in array:
+                        print ponto
                 flag = True
                 break
             
