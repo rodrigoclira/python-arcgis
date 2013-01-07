@@ -4,12 +4,12 @@ import arcpy
 cur_edificacao  = arcpy.SearchCursor('RFPM_Edificacoes_dwg_Polygon')
 cur_lote = arcpy.SearchCursor('RFPM_Lotes')
 flag = False
-for edificacao in cur_edificacao:
+for row in cur_edificacao:
+    if flag:
+        break
     if int(row.getValue('Elevation')) == 103012:
 	poligono = row.getValue('Shape')
-        centroide = poligono.centroid
-        if flag:
-            break
+        centroide = poligono.centroid        
 	for lote in cur_lote:
             pol_lote = lote.getValue("Shape")
             if pol_lote.contains(centroide):
