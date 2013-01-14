@@ -47,7 +47,7 @@ class Resultado():
         
 #Procura o lote da edificacao
 def procurar_lote(edificacao):
-    cur_lote = arcpy.SearchCursor('RFPM_Lotes')
+    cur_lote = arcpy.SearchCursor('RFPM_Lotes',"","","Shape")
     pol_edificacao = edificacao.getValue('Shape')
     res = None
     for lote in cur_lote:
@@ -61,7 +61,7 @@ def procurar_lote(edificacao):
     
 
 if __name__ == '__main__':
-    cur_edificacao  = arcpy.SearchCursor('RFPM_Edificacoes_dwg_Polygon')
+    cur_edificacao  = arcpy.SearchCursor('RFPM_Edificacoes_dwg_Polygon',"","","FID; Shape; Elevation")
     res= None
     for edificacao in cur_edificacao:
         elevation = int(edificacao.getValue('Elevation'))
