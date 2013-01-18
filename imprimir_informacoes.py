@@ -43,8 +43,18 @@ class Resultado():
     def fracao_ideal(self):
         self.fi = (self.lote.area * self.edificacao.area) / float(self.edificacao.area)
 
-
-        
+    def criar_contorno(self):
+        if self.pontos_distancia:
+            array = arcpy.Array()
+            featuredList = []
+            for linha in self.pontos_distancia:
+                array.append(linha[0])
+                array.append(linha[1])
+                line = arcpy.Polyline(array)
+                featuredList.append(line)
+                array.removeAll()
+            arcpy.CopyFeatures_management(featuredList, r"C:\Documents and Settings\rcls\Meus documentos\ArcGIS\MXD\linhas\polylines.shp")
+            
 #Procura o lote da edificacao
 def procurar_lote(edificacao):
     cur_lote = arcpy.SearchCursor('RFPM_Lotes',"","","Shape")
