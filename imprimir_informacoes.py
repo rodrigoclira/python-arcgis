@@ -1,8 +1,10 @@
 #-*- coding: utf-8 -*-
 import arcpy
-
+from glob import glob
 from math import sqrt
-
+from os import remove
+from pegar_imagem import make_image
+from label_properties import show_label
 distancia_pontos = lambda p1,p2 : sqrt((p1.X - p2.X)**2 + (p1.Y - p2.Y)**2)
 agrupar_pontos = lambda pontos : zip(pontos,pontos[1:])                                                              
 
@@ -53,8 +55,21 @@ class Resultado():
                 line = arcpy.Polyline(array)
                 featuredList.append(line)
                 array.removeAll()
-            arcpy.CopyFeatures_management(featuredList, r"C:\Documents and Settings\rcls\Meus documentos\ArcGIS\MXD\linhas\polylines.shp")
-            
+            files = glob(r"C:\Documents and Settings\rcls\Meus documentos\ArcGIS\MXD\linhas\*")
+            for arquivo in files:
+                remove(arquivo)
+            flag = True
+            while flag:
+                try:
+                    arcpy.CopyFeatures_management(featuredList, r"C:\Documents and Settings\rcls\Meus documentos\ArcGIS\MXD\linhas\polylines.shp")
+                    flag = False
+                except Exception as e:
+                    print e.message
+        show_label()
+        
+    def criar_image(self):
+        make_image(self.selo_edificacao)
+        
 #Procura o lote da edificacao
 def procurar_lote(edificacao):
     cur_lote = arcpy.SearchCursor('RFPM_Lotes',"","","Shape")
@@ -72,7 +87,7 @@ def procurar_lote(edificacao):
 
 if __name__ == '__main__':
     cur_edificacao  = arcpy.SearchCursor('RFPM_Edificacoes_dwg_Polygon',"","","FID; Shape; Elevation")
-    res= None
+    res = None
     for edificacao in cur_edificacao:
         elevation = int(edificacao.getValue('Elevation'))
         if elevation != 103012:
