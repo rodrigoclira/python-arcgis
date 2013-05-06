@@ -16,21 +16,21 @@ def calcular_distancia_entre_pontos():
         self.pontos_distancia.append((ponto[0], ponto[1], distancia))
 
 INFO = {}
-DEBUG = False
+DEBUG = True
 def generate_info():
     cur_edificacao = arcpy.SearchCursor("edificacoes_final","","","")
     
     for edificacao in cur_edificacao:
-        elevation_2 = edificacao.getValue("Elevatio_2") # Encotrar o lote que ele está contido
-        cur_lote = arcpy.SearchCursor('lotes',"","","")
+        ecod_lote = edificacao.getValue("Cod_Lote") # Encotrar o lote que ele está contido
+        cur_lote = arcpy.SearchCursor('BPM_Lotes',"","","")
         for lote in cur_lote:
-            elevation = lote.getValue('Elevation')
-            if elevation == elevation_2:
+            lcod_lote = lote.getValue("Cod_Lote")
+            if lcod_lote == ecod_lote:
                 #print 'elevation: ',elevation, 'elevation 2: ', elevation_2
                 lshape = lote.getValue('Shape')
-                selo = edificacao.getValue('OBJECTID')
+                selo = edificacao.getValue('Cod_Imo')
                 eshape = edificacao.getValue("Shape")
-                print 'Eshape', eshape
+                #print 'Eshape', eshape
                 #INICIO DA MANIPULACAO#
                 pontos = []
                 pontos_agrupados = []
@@ -40,7 +40,7 @@ def generate_info():
                     for ponto in array:
                         pontos.append(ponto)
 #                print pontos
-                referencias  = filter(lambda (x,y,z,w):  int(x) == int(selo),REFERENCIAS)
+                referencias  = filter(lambda (x,y,z,w):  int(x) == int(ecod_lote), REFERENCIAS)
 
                 #Distancia dos lados
                 pontos_agrupados = agrupar_pontos(pontos)
@@ -49,21 +49,25 @@ def generate_info():
                     pontos_distancia.append((ponto[0], ponto[1], distancia))                
 
                 #Confrontantes
-                """
-                for referencia in referencias:
-                    cur2_edificacao = arcpy.SearchCursor("edificacoes_final","","","")
-                    array_distancia = []
-                    print referencia
-                    for ed in cur2_edificacao:
-                        objectid = ed.getValue('OBJECTID')
-                        if (objectid != selo):  
-                            ed_shape = ed.getValue('shape')
-                            distancia = distancia_pontos(referencia[1].centroid, ed_shape.centroid)
-                            array_distancia.append((objectid, distancia))
-                    array_distancia.sort(lambda x,y: cmp(x[-1],y[-1]))
-                    print array_distancia
-                    confrontantes.append((referencia[-1], array_distancia[0][0]))
-                """
+                cur_referencia_final = arcpy.SearchCursor("referencia_final","","","posicao; Elevation_; Shape")
+                for referencia in cur_referencia_final:
+                    elevation_ = referencia.getValue("Elevation_")
+                    if (elevation_ == lcod_lote):
+                        cur2_edificacao = arcpy.SearchCursor("edificacoes_final","","","")
+                        array_distancia = []
+                        ponto = referencia.getValue("Shape")
+                        posicao = referencia.getValue("posicao")
+                        for ed in cur2_edificacao:
+                            cod_imo = ed.getValue('Cod_Imo')
+                            if (cod_imo != selo):  
+                                ed_shape = ed.getValue('shape')
+                                distancia = distancia_pontos(ponto.centroid, ed_shape.centroid)
+                                array_distancia.append((cod_imo, distancia))
+                        array_distancia.sort(lambda x,y: cmp(x[-1],y[-1]))
+                        #print array_distancia
+                        #print posicao
+                        confrontantes.append((posicao, array_distancia[0][0]))
+                
                 if DEBUG:    
                     print "--- INFO ---"
                     print "Selo do imovel %d" % selo
@@ -88,20 +92,20 @@ def load_referencias():
     for referencia in cur_referencia_final:
         posicao = referencia.getValue('posicao')
         shape = referencia.getValue('Shape')
-        elevation = referencia.getValue('Elevation_')
-        cur_edificacao = arcpy.SearchCursor("lotes","","","")
+        cod_lote = referencia.getValue('Elevation_')
+        cur_lote = arcpy.SearchCursor("BPM_Lotes","","","")
         distancia = 0
         array_distancia = []
-        for ed in cur_edificacao:            
-            objectid = ed.getValue('OBJECTID')
-            if (objectid != elevation):
-                ed_shape = ed.getValue('shape')
-                distancia = distancia_pontos(shape.centroid, ed_shape.centroid)
-                array_distancia.append((objectid, distancia))
+        for lote in cur_lote:      
+            cod_elote = lote.getValue('Cod_Lote')
+            if (cod_elote != cod_lote):
+                lote_shape = lote.getValue('shape')
+                distancia = distancia_pontos(shape.centroid, lote_shape.centroid)
+                array_distancia.append((cod_lote, distancia))
                 array_distancia.sort(lambda x,y: cmp(x[-1],y[-1]))
-        REFERENCIAS.append((elevation, shape, posicao, array_distancia[0][0]))
-    print REFERENCIAS
+        REFERENCIAS.append((cod_lote, shape, posicao, array_distancia[0][0]))
+#    print REFERENCIAS
     
 if __name__ == '__main__':
-    load_referencias()
+    #load_referencias()
     generate_info()
