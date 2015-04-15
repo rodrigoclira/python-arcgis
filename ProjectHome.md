@@ -1,0 +1,1 @@
+Criação do módulo de extração de informações.
