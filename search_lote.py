@@ -1,5 +1,5 @@
 #Procura o lote da edificacao
-
+#teste
 import arcpy
 cur_edificacao  = arcpy.SearchCursor('RFPM_Edificacoes_dwg_Polygon')
 cur_lote = arcpy.SearchCursor('RFPM_Lotes')
